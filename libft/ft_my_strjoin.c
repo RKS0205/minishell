@@ -18,16 +18,15 @@ char	*ft_my_strjoin(char *s1, char *s2)
 	int		count;
 	int		count2;
 
-	count = 0;
+	count = -1;
 	count2 = 0;
+	if (s1 == NULL && s2 != NULL)
+		return (ft_strdup(s2));
 	s = malloc ((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
-	if (s == NULL)
+	if (s == NULL || s2 == NULL)
 		return (NULL);
-	while (s1[count] != '\0')
-	{
+	while (s1[++count] != '\0')
 		s[count] = s1[count];
-		count++;
-	}
 	while (s2[count2] != '\0')
 	{
 		s[count] = s2[count2];

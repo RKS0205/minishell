@@ -1,73 +1,86 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cmd_split.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rkenji-s <rkenji-s@student.42sp.org.br>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/11 13:24:14 by rkenji-s          #+#    #+#             */
+/*   Updated: 2022/03/11 13:24:14 by rkenji-s         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
-static int	get_cmd_count(char *s)
+static int	get_cmd_count(char *s, int n, int count)
 {
-	int		i;
-	int		n;
-	char	c;
+	char	quote;
 
-	n = 0;
-	i = 0;
-	while (s[i] != '\0')
-	{
-		while (s[i] == ' ')
-			i++;
-		if ((s[i] == '\'' || s[i] == '\"') && s[i + 1] != '\0')
-		{
-			c = s[i];
-			i++;
-			while (s[i] != c && s[i + 1] != '\0')
-				i++;
-			n++;
-		}
-		else if (s[i] != ' ' && (s[i + 1] == ' ' || s[i + 1] == '\0'))
-			n++;
-		i++;
-	}
-	return (n);
-}
-
-static void	do_cmd_split(char	*s, char **matriz, int n, int strcount)
-{
-	int	start;
-
-	start = 0;
 	while (s[n] != '\0')
 	{
 		while (s[n] == ' ')
 			n++;
-		start = n;
-		if (s[n] == '\'' || s[n] == '\"')
+		while (s[n] != ' ' && s[n] != '\0')
 		{
+			if (s[n] == '\"' || s[n] == '\'')
+			{
+				quote = s[n];
+				n++;
+				while (s[n] != quote && s[n] != '\0')
+					n++;
+				if (s[n] == quote)
+					n++;
+			}
+			else
+				n++;
+		}
+		count++;
+	}
+	return (count);
+}
+
+static void	do_cmd_split(char	*s, char **matriz, int n, int strcount)
+{
+	char	quote;
+
+	while (s[n] != '\0')
+	{
+		while (s[n] == ' ')
 			n++;
-			start++;
-			while (s[n] != s[start - 1] && s[n] != '\0')
-				n++;
-			matriz[strcount++] = ft_substr(s, start, n - start);
-			if (s[n] == s[start - 1])
-				n++;
-		}
-		else
+		matriz[strcount] = NULL;
+		while (s[n] != ' ' && s[n] != '\0')
 		{
-			while (s[n] != ' ' && s[n] != '\0')
+			if (s[n] == '\"' || s[n] == '\'')
+			{
+				quote = s[n];
 				n++;
-			matriz[strcount++] = ft_substr(s, start, n - start);
+				while (s[n] != quote && s[n] != '\0')
+					matriz[strcount] = ft_my_charjoin(matriz[strcount], s[n++]);
+				if (s[n] == quote)
+					n++;
+			}
+			else
+				matriz[strcount] = ft_my_charjoin(matriz[strcount], s[n++]);
 		}
+		strcount++;
 	}
 }
 
 char	**cmd_split(char *s)
 {
 	char	**ret;
-	int		n;
-	int		strcount;
+	char	*str;
+	int		size;
 
-	ret = (char **) malloc (sizeof(char *) * (get_cmd_count(s) + 1));
+	str = ft_strtrim(s, " ");
+	if (str == NULL)
+		return (NULL);
+	size = get_cmd_count(str, 0, 0);
+	ret = (char **) malloc (sizeof(char *) * (size + 1));
 	if (ret == NULL)
 		return (NULL);
-	n = 0;
-	strcount = 0;
-	do_cmd_split(s, ret, n, strcount);
-	ret[get_cmd_count(s)] = NULL;
+	do_cmd_split(str, ret, 0, 0);
+	ret[get_cmd_count(str, 0, 0)] = NULL;
+	free (str);
 	return (ret);
 }

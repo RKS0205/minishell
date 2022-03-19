@@ -69,5 +69,7 @@ t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 void	free_split(char **s);
 char	*ft_my_strjoin(char *s1, char *s2);
 char	*ft_my_charjoin(char *s1, char s2);
+int		ft_str_check(const char *s1, const char *s2);
+int		ft_str_isnum(char *str);
 
 #endif

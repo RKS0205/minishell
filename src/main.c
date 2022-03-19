@@ -1,79 +1,85 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rkenji-s <rkenji-s@student.42sp.org.br>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/15 20:24:30 by rkenji-s          #+#    #+#             */
+/*   Updated: 2022/03/15 20:24:30 by rkenji-s         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
-void	parse_line(char *cmd)
-{
-	int		i;
-	int		start;
-	char	temp;
-	char	*file;
-	char	*file2;
-	char	*line;
+t_data	*g_data;
 
-	i = 0;
-	(void)file;
-	(void)file2;
-	line = NULL;
-	while (cmd[i] != '\0')
+void	do_command(char *line, char **env)
+{
+	t_link	*list;
+
+	(void)env;
+	g_data->in_exec = 1;
+	if (line[0] == '\0')
+		return ;
+	add_history(line);
+	list = (t_link *) malloc (sizeof (t_link));
+	g_data->list = list;
+	list->cmd = NULL;
+	parse_line(line, list);
+	if (g_data->error == 1)
 	{
-		if (cmd[i] == '\'' || cmd[i] == '\"')
-		{
-			i++;
-			temp = cmd[i - 1];
-			while (cmd[i] != temp && cmd[i] != '\0')
-				line = ft_my_charjoin(line, cmd[i++]);
-		}
-		else if (cmd[i] == '<')
-		{
-			if (line == NULL)
-				line = ft_substr(cmd, 0, i);
-			i++;
-			while (cmd[i] == ' ')
-				i++;
-			start = i;
-			while (cmd[i] != ' ' && cmd[i] != '\0')
-				i++;
-			file2 = ft_substr(cmd, start, i - start);
-		}
-		else if (cmd[i] == '>')
-		{
-			if (line == NULL)
-				line = ft_substr(cmd, 0, i);
-			i++;
-			while (cmd[i] == ' ')
-				i++;
-			start = i;
-			while (cmd[i] != ' ' && cmd[i] != '\0')
-				i++;
-			file = ft_substr(cmd, start, i - start);
-		}
-		if (cmd[i] != '\0')
-		{
-			line = ft_my_charjoin(line, cmd[i]);
-			i++;
-		}
+		free_list(g_data->list);
+		return ;
 	}
-	printf ("%s\n%s\n%s\n", file, file2, line);
+	while (list != NULL)
+	{
+		exec_command(list, env);
+		list = list->next;
+	}
+	free_list(g_data->list);
 }
 
-void	do_command(char *line)
+void	readline_loop(char **env)
 {
-	int		i;
-	char	**cmds;
-
-	cmds = ft_split(line, '|');
-	i = 0;
-	while (cmds[i] != NULL)
-		parse_line(cmds[i++]);
-}
-
-int main(void)
-{
-	char *line;
-
+	signal (SIGINT, kill_loop);
+	signal (SIGQUIT, do_nothing);
 	while (1)
 	{
-		line = readline("MINISHELL> ");
-		do_command(line);
-		free (line);
+		g_data->error = 0;
+		g_data->in_exec = 0;
+		g_data->line = NULL;
+		g_data->list = NULL;
+		g_data->line = readline("MINISHELL>");
+		if (g_data->line != NULL)
+			do_command(g_data->line, env);
+		else
+		{
+			free_all();
+			write (1, "exit\n", 5);
+			exit (0);
+		}
+		free (g_data->line);
+		if (g_data->exit == 1)
+			exit (0);
+		dup2(g_data->save_stdin, STDIN);
+		dup2(g_data->save_stdout, STDOUT);
 	}
+}
+
+int	main(int argc, char **argv, char **env)
+{
+	(void)argv;
+	if (argc != 1)
+	{
+		perror("Invalid arguments\n");
+		exit (1);
+	}
+	g_data = (t_data *) malloc (sizeof(t_data));
+	g_data->exit_code = 0;
+	g_data->exit = 0;
+	g_data->env = copy_env(env);
+	g_data->save_stdin = dup(STDIN);
+	g_data->save_stdout = dup(STDOUT);
+	readline_loop(env);
 }

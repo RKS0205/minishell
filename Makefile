@@ -1,4 +1,6 @@
-SRC_FILES= main.c cmd_split.c
+SRC_FILES= main.c cmd_split.c list.c parse_conditionals.c exec_command.c \
+			get_path.c exit.c open.c signal.c error.c echo.c free.c env.c \
+			pwd.c export.c unset.c cd.c parse.c
 SRC_B_FILES=
 SRC=$(addprefix src/, $(SRC_FILES))
 SRC_B=$(addprefix src_bonus/, $(SRC_B_FILES))
@@ -25,6 +27,9 @@ obj/%.o: src/%.c
 
 obj_bonus/%.o: src_bonus/%.c
 	gcc -Wall -Werror -Wextra -c $< -o $@
+
+valgrind: $(NAME)
+	valgrind --suppressions=readline.supp ./minishell
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)

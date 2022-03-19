@@ -37,6 +37,8 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 
 	a = 0;
 	b = 0;
+	if (len == 0)
+		return (NULL);
 	count = my_count(s, start, len);
 	str = (char *) malloc (sizeof(char) * count + 1);
 	if (str == NULL)
