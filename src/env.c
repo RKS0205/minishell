@@ -25,7 +25,7 @@ char	**copy_env(char **env)
 	ret = (char **) malloc (sizeof(char *) * (i + 1));
 	while (env[++n] != NULL)
 		ret[n] = ft_strdup(env[n]);
-	ret[i] = NULL;
+	ret[n] = NULL;
 	return (ret);
 }
 

@@ -51,13 +51,21 @@ void	export_add(char *var)
 	i = -1;
 	while (g_data->env[size] != NULL)
 		size++;
-	str = (char **) malloc (sizeof (char *) * size + 2);
-	while (++i < size - 1)
+	str = (char **) malloc (sizeof(char *) * (size + 2));
+	while (g_data->env[++i] != NULL)
+	{
+		if (i == size - 2)
+		{
+			str[i] = ft_strdup(g_data->env[i]);
+			i++;
+			str[i] = ft_strdup(var);
+			i++;
+			str[i] = ft_strdup(g_data->env[i - 1]);
+			break ;
+		}
 		str[i] = ft_strdup(g_data->env[i]);
-	str[i] = ft_strdup(var);
-	i++;
-	str[i] = ft_strdup(g_data->env[i - 1]);
-	str[++i] = NULL;
+	}
+	str[size + 1] = NULL;
 	free_split (g_data->env);
 	g_data->env = str;
 }

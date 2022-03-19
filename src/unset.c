@@ -15,10 +15,12 @@
 void	remove_from_env(char *var)
 {
 	int		i;
+	int		n;
 	char	**str;
 	int		size;
 
 	i = -1;
+	n = -1;
 	str = NULL;
 	size = 0;
 	while (g_data->env[size] != NULL)
@@ -27,7 +29,7 @@ void	remove_from_env(char *var)
 	while (g_data->env[++i] != NULL)
 	{
 		if (ft_strncmp(var, g_data->env[i], ft_strlen(var)) != 0)
-			str[i] = ft_strdup(g_data->env[i]);
+			str[++n] = ft_strdup(g_data->env[i]);
 	}
 	str[i - 1] = NULL;
 	free_split (g_data->env);

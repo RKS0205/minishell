@@ -78,6 +78,7 @@ int	main(int argc, char **argv, char **env)
 	g_data = (t_data *) malloc (sizeof(t_data));
 	g_data->exit_code = 0;
 	g_data->exit = 0;
+	g_data->exec_pid = 0;
 	g_data->env = copy_env(env);
 	g_data->save_stdin = dup(STDIN);
 	g_data->save_stdout = dup(STDOUT);

@@ -29,7 +29,7 @@ obj_bonus/%.o: src_bonus/%.c
 	gcc -Wall -Werror -Wextra -c $< -o $@
 
 valgrind: $(NAME)
-	valgrind --suppressions=readline.supp ./minishell
+	valgrind --suppressions=readline.supp --leak-check=full ./minishell
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
