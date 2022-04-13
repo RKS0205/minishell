@@ -15,6 +15,11 @@
 void	kill_loop(int signum)
 {
 	(void)signum;
+	if (g_data->here_doc == 1)
+	{
+		close (STDIN);
+		g_data->error = 1;
+	}
 	if (g_data->exec_pid != 0 && g_data->in_exec == 1)
 	{
 		kill(g_data->exec_pid, SIGKILL);
@@ -30,8 +35,12 @@ void	kill_loop(int signum)
 	g_data->exit_code = 130;
 }
 
-void	do_nothing(int signum)
+void	quit_core(int signum)
 {
 	(void)signum;
-	return ;
+	if (g_data->exec_pid != 0 && g_data->in_exec == 1)
+	{
+		kill(g_data->exec_pid, SIGKILL);
+		ft_putstr_fd("Quit (Core dumped)\n", 1);
+	}
 }

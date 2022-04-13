@@ -27,8 +27,9 @@ void	open_delimiter(t_link *list)
 		{
 			if (line != NULL)
 				free (line);
-			if (line == NULL)
-				write (1, "\n", 1);
+			if (line == NULL && g_data->error == 0)
+				printf (" warning: here-document delimited by"
+					" end-of-file (wanted `%s')\n", list->file_in);
 			close(fd);
 			list->fdin = open(".here_doc", O_RDONLY);
 			unlink(".here_doc");
@@ -48,13 +49,20 @@ void	open_file_input(t_link *list)
 		{
 			write (2, list->file_in, ft_strlen(list->file_in));
 			write (2, ": No such file or directory\n", 28);
-			exit(1);
+			g_data->error = 1;
+			return ;
 		}
 		else if (access(list->file_in, F_OK | R_OK) == 0 \
 					&& list->delimiter == 0)
 			list->fdin = open (list->file_in, O_RDONLY);
 		else if (list->delimiter == 1)
+		{
+			g_data->here_doc = 1;
+			signal (SIGQUIT, SIG_IGN);
 			open_delimiter(list);
+			signal (SIGQUIT, quit_core);
+			g_data->here_doc = 0;
+		}
 		dup2 (list->fdin, STDIN);
 	}
 }
@@ -72,8 +80,6 @@ void	open_file_output(t_link *list)
 			list->fdout = open(list->file_out, O_WRONLY | O_TRUNC);
 		else if (access(list->file_out, F_OK) == 0 && list->append == 1)
 			list->fdout = open(list->file_out, O_WRONLY | O_APPEND);
-		dup2 (list->fdout, STDOUT);
+		dup2(list->fdout, STDOUT);
 	}
-	else if (list->file_out == NULL && list->next != NULL)
-		dup2(list->pipefd[1], STDOUT);
 }

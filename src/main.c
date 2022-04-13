@@ -18,7 +18,7 @@ void	do_command(char *line, char **env)
 {
 	t_link	*list;
 
-	(void)env;
+	signal (SIGQUIT, quit_core);
 	g_data->in_exec = 1;
 	if (line[0] == '\0')
 		return ;
@@ -34,7 +34,8 @@ void	do_command(char *line, char **env)
 	}
 	while (list != NULL)
 	{
-		exec_command(list, env);
+		if (list->cmd != NULL)
+			exec_command(list, env);
 		list = list->next;
 	}
 	free_list(g_data->list);
@@ -43,13 +44,14 @@ void	do_command(char *line, char **env)
 void	readline_loop(char **env)
 {
 	signal (SIGINT, kill_loop);
-	signal (SIGQUIT, do_nothing);
 	while (1)
 	{
+		signal (SIGQUIT, SIG_IGN);
 		g_data->error = 0;
 		g_data->in_exec = 0;
 		g_data->line = NULL;
 		g_data->list = NULL;
+		g_data->here_doc = 0;
 		g_data->line = readline("MINISHELL>");
 		if (g_data->line != NULL)
 			do_command(g_data->line, env);
@@ -79,7 +81,7 @@ int	main(int argc, char **argv, char **env)
 	g_data->exit_code = 0;
 	g_data->exit = 0;
 	g_data->exec_pid = 0;
-	g_data->env = copy_env(env);
+	g_data->env = copy_first_env(env);
 	g_data->save_stdin = dup(STDIN);
 	g_data->save_stdout = dup(STDOUT);
 	readline_loop(env);

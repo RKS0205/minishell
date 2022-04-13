@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rkenji-s <rkenji-s@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/14 18:41:11 by rkenji-s          #+#    #+#             */
-/*   Updated: 2022/03/14 18:41:11 by rkenji-s         ###   ########.fr       */
+/*   Created: 2022/03/23 15:40:16 by rkenji-s          #+#    #+#             */
+/*   Updated: 2022/03/23 15:40:16 by rkenji-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,21 @@ void	free_list(t_link *list)
 {
 	t_link	*temp;
 
-	while (list->next != NULL)
+	while (list != NULL)
 	{
 		temp = list->next;
 		free(list->file_in);
 		free(list->file_out);
+		if (list->fdin != 0)
+			close (list->fdin);
+		if (list->fdout != 0)
+			close (list->fdout);
 		if (list->cmd != NULL)
 			free_split(list->cmd);
 		free(list->path);
 		free (list);
 		list = temp;
 	}
-	free(list->file_in);
-	free(list->file_out);
-	if (list->cmd != NULL)
-		free_split(list->cmd);
-	free(list->path);
-	free (list);
 }
 
 void	free_all(void)
@@ -43,5 +41,7 @@ void	free_all(void)
 		free (g_data->line);
 	free_split(g_data->env);
 	rl_clear_history();
+	close(g_data->save_stdin);
+	close(g_data->save_stdout);
 	free (g_data);
 }

@@ -12,6 +12,31 @@
 
 #include "../minishell.h"
 
+char	**copy_first_env(char **env)
+{
+	char	**ret;
+	int		i;
+	int		n;
+
+	i = -1;
+	n = 0;
+	while (env[++i] != NULL)
+	{
+		if (ft_strnstr(env[i], "WORKSPACE", ft_strlen(env[i])) == NULL)
+			n++;
+	}
+	ret = (char **) malloc (sizeof(char *) * (n + 1));
+	n = -1;
+	i = 0;
+	while (env[++n] != NULL)
+	{
+		if (ft_strnstr(env[n], "WORKSPACE", ft_strlen(env[n])) == NULL)
+			ret[i++] = ft_strdup(env[n]);
+	}
+	ret[i] = NULL;
+	return (ret);
+}
+
 char	**copy_env(char **env)
 {
 	char	**ret;
@@ -36,7 +61,9 @@ char	*find_env(char *var)
 	i = 0;
 	while (g_data->env[i] != NULL)
 	{
-		if (ft_strncmp(var, g_data->env[i], ft_strlen(var)) == 0)
+		if (ft_strncmp(var, g_data->env[i], ft_strlen(var)) == 0 \
+		&& (g_data->env[i][ft_strlen(var)] == '=' \
+		|| g_data->env[i][ft_strlen(var)] == '\0'))
 		{
 			if (g_data->env[i][ft_strlen(var)] == '=')
 				return (g_data->env[i] + ft_strlen(var) + 1);

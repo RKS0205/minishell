@@ -21,6 +21,7 @@
 # include <stdlib.h>
 # include <sys/wait.h>
 # include <fcntl.h>
+# include <sys/stat.h>
 # include "libft/libft.h"
 # include <readline/readline.h>
 # include <readline/history.h>
@@ -46,6 +47,7 @@ typedef struct s_data
 	int		error;
 	int		in_exec;
 	int		exec_pid;
+	int		here_doc;
 	int		save_stdin;
 	int		save_stdout;
 	char	*line;
@@ -69,7 +71,7 @@ char	*get_next_line(int fd);
 void	readline_loop(char **env);
 void	kill_loop(int signum);
 void	free_list(t_link *list);
-void	exit_error_path(char **check, char **cmd);
+void	exit_error_path(char **check, t_link *list);
 void	open_delimiter(t_link *list);
 void	open_file_input(t_link *list);
 void	open_file_output(t_link *list);
@@ -92,5 +94,10 @@ void	export_add(char *var);
 void	parse_line(char *cmd, t_link *list);
 void	invalid_syntax_error(char *cmd);
 void	do_export(char *var);
+void	check_redirect_error(char *file);
+int		check_dir(char *path);
+void	check_directory_error(char *file);
+void	quit_core(int signum);
+char	**copy_first_env(char **env);
 
 #endif

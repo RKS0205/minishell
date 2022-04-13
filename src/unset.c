@@ -23,15 +23,19 @@ void	remove_from_env(char *var)
 	n = -1;
 	str = NULL;
 	size = 0;
+	if (find_env(var) == NULL)
+		return ;
 	while (g_data->env[size] != NULL)
 		size++;
 	str = (char **) malloc (sizeof(char *) * size);
 	while (g_data->env[++i] != NULL)
 	{
-		if (ft_strncmp(var, g_data->env[i], ft_strlen(var)) != 0)
+		if (!(ft_strncmp(var, g_data->env[i], ft_strlen(var)) == 0 \
+			&& (g_data->env[i][ft_strlen(var)] == '=' \
+			|| g_data->env[i][ft_strlen(var)] == '\0')))
 			str[++n] = ft_strdup(g_data->env[i]);
 	}
-	str[i - 1] = NULL;
+	str[n + 1] = NULL;
 	free_split (g_data->env);
 	g_data->env = str;
 }
@@ -56,11 +60,11 @@ void	unset_built_in(char	**cmd)
 	int	i;
 
 	i = 0;
+	g_data->exit_code = 0;
 	if (cmd[1] == NULL)
 		return ;
 	while (cmd[++i] != NULL)
 	{
-		g_data->exit_code = 0;
 		if (check_unset_var(cmd[i]))
 			remove_from_env(cmd[i]);
 		else

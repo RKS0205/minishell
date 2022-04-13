@@ -34,8 +34,8 @@ int	check_if_built_in(t_link *list)
 
 void	exec_built_in(t_link *list)
 {
-	open_file_input(list);
-	open_file_output(list);
+	if (list->file_out == NULL && list->next != NULL)
+		dup2(list->pipefd[1], STDOUT);
 	if (ft_str_check(list->cmd[0], "echo"))
 		echo_built_in(list->cmd);
 	else if (ft_str_check(list->cmd[0], "pwd"))
@@ -59,11 +59,18 @@ void	exec_built_in(t_link *list)
 void	child_command(t_link *list, char **env)
 {
 	close(list->pipefd[0]);
-	open_file_input(list);
-	open_file_output(list);
+	if (list->file_out == NULL && list->next != NULL)
+		dup2(list->pipefd[1], STDOUT);
 	list->path = get_path(list);
-	execve(list->path, list->cmd, env);
+	if (list->file_in != NULL)
+	{
+		dup2(list->fdin, STDIN);
+		close (list->fdin);
+	}
 	close(list->pipefd[1]);
+	close(g_data->save_stdin);
+	close(g_data->save_stdout);
+	execve(list->path, list->cmd, env);
 	ft_putstr_fd("Error while executing\n", STDERR);
 	free_all();
 	exit (1);

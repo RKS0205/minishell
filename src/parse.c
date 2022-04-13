@@ -16,11 +16,14 @@ void	parse_loop(t_link *list, t_link **new, char *cmd, char **line)
 {
 	int		i;
 
-	i = -1;
-	while (cmd[++i] != '\0')
+	i = 0;
+	while (cmd[i] != '\0')
 	{
 		while (cmd[i] == ' ' && *line == NULL)
 			i++;
+		if (cmd[i] == '&' || cmd[i] == ';' || cmd[i] == '\\' \
+		|| cmd[i] == '(' || cmd[i] == ')' || cmd[i] == '*')
+			invalid_syntax_error(cmd + i);
 		if (cmd[i] == '\'' || cmd[i] == '\"')
 			i += parse_quotes(cmd + i, &(*line), cmd[i]);
 		else if (cmd[i] == '>')
@@ -31,13 +34,10 @@ void	parse_loop(t_link *list, t_link **new, char *cmd, char **line)
 			i += parse_variables (cmd + i, &(*line));
 		else if (cmd[i] == '|')
 			i += parse_split (cmd + i, &(*line), list, &(*new));
-		if (cmd[i] == '&' || cmd[i] == ';' || cmd[i] == '\\' \
-		|| cmd[i] == '(' || cmd[i] == ')')
-			invalid_syntax_error(cmd + i);
+		else if (cmd[i] != '\0')
+			*line = ft_my_charjoin(*line, cmd[i++]);
 		if (g_data->error == 1 || cmd[i] == '\0')
 			return ;
-		if (cmd[i] != '\0')
-			*line = ft_my_charjoin(*line, cmd[i]);
 	}
 }
 
@@ -50,7 +50,8 @@ void	parse_line(char *cmd, t_link *list)
 	init_list_element(new);
 	line = NULL;
 	parse_loop(list, &new, cmd, &line);
-	new->cmd = cmd_split(line);
+	if (line != NULL)
+		new->cmd = cmd_split(line);
 	free (line);
 	add_list(list, new);
 	if (list->cmd == NULL)

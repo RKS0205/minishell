@@ -16,9 +16,10 @@ void	pwd_built_in(void)
 {
 	char	*str;
 
-	str = find_env("PWD");
-	ft_putstr_fd(str, 1);
-	write (1, "\n", 1);
 	g_data->exit_code = 0;
+	str = malloc (1024);
+	ft_putstr_fd(getcwd(str, 1024), STDOUT);
+	write (1, "\n", 1);
+	free (str);
 	return ;
 }

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rkenji-s <rkenji-s@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/11 13:24:14 by rkenji-s          #+#    #+#             */
-/*   Updated: 2022/03/11 13:24:14 by rkenji-s         ###   ########.fr       */
+/*   Created: 2022/03/23 15:37:57 by rkenji-s          #+#    #+#             */
+/*   Updated: 2022/03/23 15:37:57 by rkenji-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ static void	do_cmd_split(char	*s, char **matriz, int n, int strcount)
 	{
 		while (s[n] == ' ')
 			n++;
-		matriz[strcount] = NULL;
+		matriz[strcount] = ft_strdup("\0");
 		while (s[n] != ' ' && s[n] != '\0')
 		{
 			if (s[n] == '\"' || s[n] == '\'')
@@ -80,6 +80,8 @@ char	**cmd_split(char *s)
 	if (ret == NULL)
 		return (NULL);
 	do_cmd_split(str, ret, 0, 0);
+	if (ret[0] == NULL)
+		return (NULL);
 	ret[get_cmd_count(str, 0, 0)] = NULL;
 	free (str);
 	return (ret);

@@ -35,15 +35,36 @@ char	*my_path_join(char const *s1, char const *s2)
 	return (s);
 }
 
+int	check_dir(char *path)
+{
+	struct stat	statbuf;
+
+	if (stat(path, &statbuf) != 0)
+		return (0);
+	return (S_ISDIR(statbuf.st_mode));
+}
+
 char	*check_relative_absolute_paths(char *cmd)
 {
 	char	*rel_path;
 
-	if (access(cmd, F_OK | X_OK) == 0)
+	if (cmd[0] == '\0')
+		return (NULL);
+	if (access(cmd, F_OK | X_OK) == 0 && check_dir(cmd) == 0)
 		return (cmd);
+	if (find_env("PWD") == NULL)
+		return (NULL);
 	rel_path = ft_strjoin(find_env("PWD"), cmd);
-	if (access(rel_path, F_OK | X_OK) == 0)
+	if (access(rel_path, F_OK | X_OK) == 0 && check_dir(rel_path) == 0)
 		return (rel_path);
+	check_directory_error(cmd);
+	check_directory_error(rel_path);
+	if (g_data->error == 1)
+	{
+		free (rel_path);
+		free_all();
+		exit (126);
+	}
 	free (rel_path);
 	return (NULL);
 }
@@ -51,28 +72,26 @@ char	*check_relative_absolute_paths(char *cmd)
 char	*get_path(t_link *list)
 {
 	int		i;
-	char	*line;
 	char	**check;
 	char	*path;
 
-	line = getenv("PATH");
-	check = ft_split(line, ':');
-	if (ft_str_check(list->cmd[0], ".") || ft_str_check(list->cmd[0], "/"))
-		exit_error_path(check, list->cmd);
 	i = -1;
 	path = check_relative_absolute_paths(list->cmd[0]);
 	if (path != NULL)
 		return (path);
+	if (find_env("PATH") == NULL || list->cmd[0][0] == '\0')
+		exit_error_path(NULL, list);
+	check = ft_split(find_env("PATH"), ':');
 	while (check[++i] != NULL)
 	{
 		path = my_path_join(check[i], list->cmd[0]);
-		if (access(path, F_OK | X_OK) == 0)
+		if (access(path, F_OK | X_OK) == 0 && check_dir(path) == 0)
 		{
 			free_split(check);
 			return (path);
 		}
 		free(path);
 	}
-	exit_error_path(check, list->cmd);
+	exit_error_path(check, list);
 	exit (127);
 }
